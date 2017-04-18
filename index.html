@@ -1,0 +1,36 @@
+
+<!doctype html>
+<html>
+	<head>
+        <script src="phaser.min.js"></script>
+        <script src="src/boot.js"></script>
+        <script src="src/preload.js"></script>
+        <script src="src/battle.js"></script>
+
+
+        <style>
+            body{margin:0}
+            .fontPreload{
+                position:absolute;
+                left:-100px;
+            }
+        </style>
+        <script>
+            (function() {
+                var game = new Phaser.Game(640, 360, Phaser.CANVAS, "phaser-ctb");
+                game.state.add("Boot", boot);
+                game.state.add("Preload", preload);
+                game.state.add("Battle", battle);
+
+                game.state.start("Boot");
+
+
+
+
+            })();    
+        </script>
+    </head>
+    <body>
+        <div id="phaser-ctb"></div>
+    </body>
+</html>
