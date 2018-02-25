@@ -1,39 +1,39 @@
 // Data for the Units
 
 var fastFelixData = {
-    'name': 'Fast Felix',
-    'defaultMaxHp': 100, // Maximum Health Points at battle start.
-    'hp': 100, // Current Healh Points.
-    'defaultSpeed': 10, // Speed at battle start.
-    'speed': 10, // Current speed.
-    'ct': 0, // Current Clock Time. Unit with CT over 100 gets a turn.
-    'testCT': 0, // Current Test Clock Time (For turn order estimation).
-    'icon': 'p1_icon', // Icon for the turn order HUD.
-    'amountOfTicksTo100': 0, // Used during testCT calculations.
+    "name": "Fast Felix",
+    "defaultMaxHp": 100, // Maximum Health Points at battle start.
+    "hp": 100, // Current Healh Points.
+    "defaultSpeed": 10, // Speed at battle start.
+    "speed": 10, // Current speed.
+    "ct": 0, // Current Clock Time. Unit with CT over 100 gets a turn.
+    "testCT": 0, // Current Test Clock Time (For turn order estimation).
+    "icon": "p1_icon", // Icon for the turn order HUD.
+    "amountOfTicksTo100": 0, // Used during testCT calculations.
 };
 
 var smoothSammyData = {
-    'name': 'Smooth Sammy',
-    'defaultMaxHp': 110,
-    'hp': 100,
-    'defaultSpeed': 7,
-    'speed': 7,
-    'ct': 0,
-    'testCT': 0,
-    'icon': 'p2_icon',
-    'amountOfTicksTo100': 0,
+    "name": "Smooth Sammy",
+    "defaultMaxHp": 110,
+    "hp": 100,
+    "defaultSpeed": 7,
+    "speed": 7,
+    "ct": 0,
+    "testCT": 0,
+    "icon": 'p2_icon',
+    "amountOfTicksTo100": 0,
 };
 
 var monsterData = {
-    'name': 'Big Dumb Monster',
-    'defaultMaxHp': 100,
-    'hp': 100,
-    'defaultSpeed': 5,
-    'speed': 5,
-    'ct': 0,
-    'testCT': 0,
-    'icon': 'm1_icon',
-    'amountOfTicksTo100': 0,
+    "name": "Big Dumb Monster",
+    "defaultMaxHp": 100,
+    "hp": 100,
+    "defaultSpeed": 5,
+    "speed": 5,
+    "ct": 0,
+    "testCT": 0,
+    "icon": "m1_icon",
+    "amountOfTicksTo100": 0,
 };
 
 // Text style
@@ -48,7 +48,7 @@ var battle = function (game) {
 battle.prototype = {
 	create: function () {
         "use strict";
-        
+
         // Flag for determining which phase of battle we're in.
         this.inTickPhase = true;
 
@@ -65,7 +65,7 @@ battle.prototype = {
 
         this.m1Display = this.game.add.text(10, 40, this.units[2].name + ":" + this.units[2].hp, fontStyle);
         this.m1Display.anchor.set(0.0);
-        
+
         // Turn Order Estimator
         // Can only ever be an estimate, since unit stats could change, moves could use different amounts of CT, etc.
         // Must be refreshed immediately after each unit's turn to remain accurate.
@@ -90,10 +90,10 @@ battle.prototype = {
                 this.estimatedTurnOrder[i].icon
             ).alignTo(this.turnOrderDisplay0, Phaser.BOTTOM_CENTER, xPos, (this.turnOrderDisplayIconHeight) * (i - 1) );
         }
-        
+
         // Button that ends a unit's turn
         // TODO: Actual menu of things you can do (Act, Defend, etc)
-        this.waitButton = this.game.add.button(-100, -100, "waitButton", this.doTurn);     
+        this.waitButton = this.game.add.button(-100, -100, "waitButton", this.doTurn);
     },
 
     update: function () {
@@ -102,7 +102,7 @@ battle.prototype = {
         this.p1Display.setText(this.units[0].name + ":" + this.units[0].hp + "hp " + " ct:" + this.units[0].ct, fontStyle);
         this.p2Display.setText(this.units[1].name + ":" + this.units[1].hp + "hp " + " ct:" + this.units[1].ct, fontStyle);
         this.m1Display.setText(this.units[2].name + ":" + this.units[2].hp + "hp " + " ct:" + this.units[2].ct, fontStyle);
-    
+
         // If no units can act, go to tickPhase.
         if (this.units.filter(function(o) { return o.ct >= 100; }).length === 0){
             this.inTickPhase = true;
@@ -125,15 +125,15 @@ battle.prototype = {
             this.activeUnit = this.units.filter(function(o) { return o.ct >= 100; })[0];
             // console.log(this.activeUnit.name + "'s turn.")
             this.waitButton.context = this;
-        } 
+        }
     },
-    
+
     tickPhase: function () {
         // Increase every unit in battle's CT by their Speed.
-        "use strict";       
+        "use strict";
         for (var i = 0; i < this.units.length; i++){
             this.units[i].ct += this.units[i].speed;
-        } 
+        }
     },
 
     estimateTurnOrder: function (index) {
@@ -141,8 +141,8 @@ battle.prototype = {
         // Calculates who should get turn number [index].
         "use strict";
         // First, figure out how many clock ticks it would take for every unit to reach 100 CT, based on their current testCT.
-        for (var i = 0; i < this.units.length; i++) {            
-            // If unit was the previous unit to go, assume CT would start at 0, and lose all the built up CT from before.            
+        for (var i = 0; i < this.units.length; i++) {
+            // If unit was the previous unit to go, assume CT would start at 0, and lose all the built up CT from before.
             if (this.estimatedTurnOrder[index - 1] === this.units[i] || this.estimatedTurnOrder[index] === this.units[i]) {
                 this.units[i].testCT = 0;
             } else if (index === 0) { // If estimating slot zero, testCT would equal current CT.
@@ -150,9 +150,9 @@ battle.prototype = {
             }
 
             this.units[i].amountOfTicksTo100 = Math.ceil(100 / this.units[i].speed) - (this.units[i].testCT / this.units[i].speed);
-            
+
         }
-        
+
         // Figure out who gets to 100 CT first, based on whoever needed the lowest amount of clock ticks.
         var minNumberOfTicks = Math.min.apply(null, this.units.map(function(o) { return o.amountOfTicksTo100; }));
         var fastestUnit = this.units.filter(function(o) { return o.amountOfTicksTo100 === minNumberOfTicks; });
@@ -164,17 +164,17 @@ battle.prototype = {
         }
 
     },
-    
+
     doTurn: function (button) {
         "use strict";
         // TODO: Split this function into something like doAction and afterTurn, once there's things besides just "wait"
         var context;
         context = button.context;
         //console.log(this.activeUnit.name + "'s Turn Occured");
-        
+
         // Remove HUD while turn occurs
         context.waitButton.kill();
-        
+
          // Turn Order Estimator Calculate (At end of turn, before next turn waiting phase)
         context.activeUnit.testCT = 0;
 
@@ -196,7 +196,7 @@ battle.prototype = {
                context.estimatedTurnOrder[i].icon
            ).alignTo(context.turnOrderDisplay0, Phaser.BOTTOM_CENTER, 0, (context.turnOrderDisplayIconHeight) * (i - 1) );
         }
-        
+
         // Reset unit's CT (At end of turn, after estimation)
         context.activeUnit.ct = 0;
     }
