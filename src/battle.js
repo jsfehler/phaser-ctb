@@ -20,7 +20,7 @@ var smoothSammyData = {
     "speed": 7,
     "ct": 0,
     "testCT": 0,
-    "icon": 'p2_icon',
+    "icon": "p2_icon",
     "amountOfTicksTo100": 0,
 };
 
@@ -140,16 +140,20 @@ battle.prototype = {
         // A sort of fake tickPhase.
         // Calculates who should get turn number [index].
         "use strict";
+        var i;
+        var unit;
+
         // First, figure out how many clock ticks it would take for every unit to reach 100 CT, based on their current testCT.
-        for (var i = 0; i < this.units.length; i++) {
+        for (i = 0; i < this.units.length; i++) {
+            unit = this.units[i];
             // If unit was the previous unit to go, assume CT would start at 0, and lose all the built up CT from before.
-            if (this.estimatedTurnOrder[index - 1] === this.units[i] || this.estimatedTurnOrder[index] === this.units[i]) {
-                this.units[i].testCT = 0;
+            if (this.estimatedTurnOrder[index - 1] === unit || this.estimatedTurnOrder[index] === unit) {
+                unit.testCT = 0;
             } else if (index === 0) { // If estimating slot zero, testCT would equal current CT.
-                this.units[i].testCT = this.units[i].ct;
+                unit.testCT = unit.ct;
             }
 
-            this.units[i].amountOfTicksTo100 = Math.ceil(100 / this.units[i].speed) - (this.units[i].testCT / this.units[i].speed);
+            unit.amountOfTicksTo100 = Math.ceil(100 / unit.speed) - (unit.testCT / unit.speed);
 
         }
 
@@ -159,8 +163,9 @@ battle.prototype = {
         this.estimatedTurnOrder[index] = fastestUnit[0];
 
         // Pretend those ticks happened by increasing testCT for the next round of calculations.
-        for (var i = 0; i < this.units.length; i++) {
-            this.units[i].testCT += this.units[i].speed * minNumberOfTicks;
+        for (i = 0; i < this.units.length; i++) {
+            unit = this.units[i];
+            unit.testCT += unit.speed * minNumberOfTicks;
         }
 
     },
