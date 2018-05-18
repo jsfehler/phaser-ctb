@@ -39,6 +39,24 @@ var monsterData = {
 // Text style
 var fontStyle = {font: "14px Arial", fill: "#FFF"};
 
+/** An object for displaying a player unit's GUI. */
+var UnitGUI = function (game, data, x, y) {
+    "use strict";
+
+    var x = x || 0;
+    var y = y || 0;
+
+    this.name = game.add.text(0, 0, data.name, fontStyle);
+    this.hp = game.add.text(0, 0, "HP: " + data.hp, fontStyle);
+    this.ct = game.add.text(0, 0, "CT: " + data.ct, fontStyle)
+
+    this.column = new uiWidgets.Column(game, x, y);
+    this.column.addNode(this.name);
+    this.column.addNode(this.hp);
+    this.column.addNode(this.ct, 0, 0, Phaser.BOTTOM_LEFT);
+};
+
+
 // Phaser State: Battle
 var battle = function (game) {
     "use strict";
@@ -55,16 +73,15 @@ battle.prototype = {
         // List of all units Data participating in the battle.
         this.units = [fastFelixData, smoothSammyData, monsterData];
 
-        // TODO: Create some sort of real HUD for this
-        // HP Display
-        this.p1Display = this.game.add.text(10, 10, this.units[0].name + ":" + this.units[0].hp, fontStyle);
-        this.p1Display.anchor.set(0.0);
+        // Display every player unit's data in a row of columns
+        this.p1Display = new UnitGUI(this.game, fastFelixData);
+        this.p2Display = new UnitGUI(this.game, smoothSammyData);
 
-        this.p2Display = this.game.add.text(10, 25, this.units[1].name + ":" + this.units[1].hp, fontStyle);
-        this.p2Display.anchor.set(0.0);
+        this.playerDisplayRow = new uiWidgets.Row(this.game, 16, 200);
+        this.playerDisplayRow.addNode(this.p1Display.column, 16);
+        this.playerDisplayRow.addNode(this.p2Display.column, 16);
 
-        this.m1Display = this.game.add.text(10, 40, this.units[2].name + ":" + this.units[2].hp, fontStyle);
-        this.m1Display.anchor.set(0.0);
+        this.m1Display = new UnitGUI(this.game, monsterData, 16, 16);
 
         // Turn Order Estimator
         // Can only ever be an estimate, since unit stats could change, moves could use different amounts of CT, etc.
@@ -98,10 +115,10 @@ battle.prototype = {
 
     update: function () {
         "use strict";
-        // Update all units HP and CT display
-        this.p1Display.setText(this.units[0].name + ":" + this.units[0].hp + "hp " + " ct:" + this.units[0].ct, fontStyle);
-        this.p2Display.setText(this.units[1].name + ":" + this.units[1].hp + "hp " + " ct:" + this.units[1].ct, fontStyle);
-        this.m1Display.setText(this.units[2].name + ":" + this.units[2].hp + "hp " + " ct:" + this.units[2].ct, fontStyle);
+        // Update all units CT display ASAP
+        this.p1Display.ct.setText("CT: " + this.units[0].ct, fontStyle);
+        this.p2Display.ct.setText("CT: " + this.units[1].ct, fontStyle);
+        this.m1Display.ct.setText("CT: " + this.units[2].ct, fontStyle);
 
         // If no units can act, go to tickPhase.
         if (this.units.filter(function(o) { return o.ct >= 100; }).length === 0){
